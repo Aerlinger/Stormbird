@@ -1,12 +1,13 @@
 /**
  * Module dependencies.
  */
-
 var express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
   , http = require('http')
-  , path = require('path');
+  , path = require('path')
+	, spawn = require('child_process').spawn
+	, fs = require('fs');
 
 var app = express();
 var server = http.createServer(app);
@@ -36,17 +37,25 @@ server.listen( app.get('port') || 3000, function(event) {
 	console.log("app started");
 });
 
-var status = "All is well";
-
 io.sockets.on('connection', function(client) {
 
 	console.log("Client connected!");
 
-	client.emit('messages', {hello: 'world'});
-	client.emit('status', {status: status});
+	var octave = spawn('octave');
 
 	client.on('command', function(command) {
 		console.log("Command entered: " + command);
-		
+
+		octave.stdin.write(command);
+		octave.stdin.end();
+
+		octave.stdout.on('data', function(data) {
+			console.log(data.toString());
+			client.emit('octave_response', data.toString());
+		});
+
 	});
+
+	
+
 });
