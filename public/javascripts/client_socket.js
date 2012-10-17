@@ -2,7 +2,6 @@ console.log("main.js included");
 
 var server = io.connect(window.location.hostname);
 
-
 server.on('connect', function(data) {
 	console.log('Client connected!');
 
